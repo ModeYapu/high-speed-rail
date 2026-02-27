@@ -1,0 +1,549 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+}
+
+body {
+    overflow: hidden;
+    background: #1a1a2e;
+    color: white;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* 启动界面 */
+#startScreen {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.title-container {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.title-container h1 {
+    font-size: 3em;
+    background: linear-gradient(45deg, #e94560, #ff6b6b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+    animation: titleGlow 2s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+    0%, 100% { filter: drop-shadow(0 0 10px rgba(233, 69, 96, 0.5)); }
+    50% { filter: drop-shadow(0 0 20px rgba(233, 69, 96, 0.8)); }
+}
+
+.subtitle {
+    font-size: 1.2em;
+    color: #a0a0a0;
+    letter-spacing: 3px;
+}
+
+/* 列车选择 */
+.train-select, .mode-select {
+    margin-bottom: 30px;
+}
+
+.train-select h2, .mode-select h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #e94560;
+}
+
+.train-options {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.train-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid transparent;
+    border-radius: 15px;
+    padding: 20px;
+    width: 250px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.train-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(233, 69, 96, 0.3);
+}
+
+.train-card.selected {
+    border-color: #e94560;
+    background: rgba(233, 69, 96, 0.2);
+}
+
+.train-preview {
+    width: 100%;
+    height: 80px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.hexie-preview {
+    background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+}
+
+.fuxing-preview {
+    background: linear-gradient(90deg, #e94560 0%, #ff6b6b 100%);
+}
+
+.train-card h3 {
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.train-card p {
+    color: #ccc;
+    font-size: 0.9em;
+    margin: 5px 0;
+}
+
+/* 模式选择 */
+.mode-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    max-width: 900px;
+}
+
+.mode-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: white;
+}
+
+.mode-btn:hover {
+    background: rgba(233, 69, 96, 0.2);
+    border-color: #e94560;
+    transform: scale(1.05);
+}
+
+.mode-icon {
+    font-size: 2em;
+}
+
+.mode-name {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.mode-desc {
+    font-size: 0.85em;
+    color: #aaa;
+}
+
+.controls-hint {
+    margin-top: 20px;
+    text-align: center;
+    color: #888;
+    font-size: 0.9em;
+}
+
+/* 游戏界面 */
+#gameScreen {
+    background: #000;
+}
+
+#gameContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* HUD */
+.hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.hud > * {
+    pointer-events: auto;
+}
+
+/* 速度表 */
+.speedometer {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 200px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 50%;
+    border: 4px solid #e94560;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 30px rgba(233, 69, 96, 0.5);
+}
+
+.speed-value {
+    font-size: 3.5em;
+    font-weight: bold;
+    color: #fff;
+    line-height: 1;
+}
+
+.speed-unit {
+    font-size: 1em;
+    color: #aaa;
+    margin-bottom: 10px;
+}
+
+.speed-dial {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.speed-needle {
+    position: absolute;
+    width: 4px;
+    height: 80px;
+    background: linear-gradient(to top, #e94560, #ff6b6b);
+    left: 50%;
+    bottom: 50%;
+    transform-origin: bottom center;
+    transform: translateX(-50%) rotate(-135deg);
+    border-radius: 2px;
+    transition: transform 0.1s;
+}
+
+/* 信息面板 */
+.info-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    padding: 15px;
+    min-width: 200px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+    font-size: 0.95em;
+}
+
+.info-item .label {
+    color: #aaa;
+}
+
+.info-item .value {
+    color: #fff;
+    font-weight: bold;
+}
+
+/* 推力面板 */
+.throttle-panel {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.throttle-bar {
+    width: 30px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+}
+
+.throttle-fill {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 0%;
+    background: linear-gradient(to top, #4CAF50, #8BC34A);
+    transition: height 0.1s;
+}
+
+.throttle-label {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #aaa;
+}
+
+/* 警告面板 */
+.warning-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 0, 0, 0.9);
+    padding: 20px 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    animation: warningPulse 0.5s ease-in-out infinite;
+}
+
+@keyframes warningPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.warning-icon {
+    font-size: 2em;
+}
+
+.warning-text {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+/* 迷你地图 */
+.mini-map {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    padding: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+#miniMapCanvas {
+    display: block;
+    border-radius: 5px;
+}
+
+/* 控制面板 */
+.controls-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.control-group {
+    display: flex;
+    gap: 10px;
+}
+
+.control-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: bold;
+    transition: all 0.2s;
+    color: white;
+}
+
+.control-btn.brake {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+}
+
+.control-btn.emergency {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    animation: emergencyPulse 2s ease-in-out infinite;
+}
+
+@keyframes emergencyPulse {
+    0%, 100% { box-shadow: 0 0 5px rgba(231, 76, 60, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.8); }
+}
+
+.control-btn.horn {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.control-btn.light {
+    background: linear-gradient(135deg, #f1c40f, #f39c12);
+}
+
+.control-btn:hover {
+    transform: scale(1.05);
+}
+
+.control-btn:active {
+    transform: scale(0.95);
+}
+
+/* 暂停菜单 */
+.pause-menu, .level-complete {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    min-width: 300px;
+    border: 2px solid #e94560;
+}
+
+.pause-menu h2, .level-complete h2 {
+    margin-bottom: 30px;
+    color: #e94560;
+}
+
+.pause-menu button, .level-complete button {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 12px;
+    background: rgba(233, 69, 96, 0.2);
+    border: 2px solid #e94560;
+    border-radius: 8px;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.pause-menu button:hover, .level-complete button:hover {
+    background: rgba(233, 69, 96, 0.4);
+    transform: scale(1.02);
+}
+
+.level-complete .stats {
+    margin: 20px 0;
+    color: #ccc;
+}
+
+.level-complete .stats p {
+    margin: 8px 0;
+}
+
+.level-complete .stars {
+    font-size: 2.5em;
+    margin: 20px 0;
+}
+
+/* 加载界面 */
+#loadingScreen {
+    background: #1a1a2e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-content {
+    text-align: center;
+}
+
+.loading-train {
+    font-size: 4em;
+    animation: trainMove 2s ease-in-out infinite;
+}
+
+@keyframes trainMove {
+    0%, 100% { transform: translateX(-20px); }
+    50% { transform: translateX(20px); }
+}
+
+.loading-content h2 {
+    margin: 20px 0;
+}
+
+.loading-bar {
+    width: 300px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.loading-progress {
+    height: 100%;
+    background: linear-gradient(90deg, #e94560, #ff6b6b);
+    width: 0%;
+    transition: width 0.3s;
+}
+
+#loadingText {
+    margin-top: 15px;
+    color: #888;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .title-container h1 {
+        font-size: 2em;
+    }
+    
+    .train-options {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .train-card {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .speedometer {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .speed-value {
+        font-size: 2.5em;
+    }
+    
+    .info-panel, .mini-map {
+        display: none;
+    }
+}

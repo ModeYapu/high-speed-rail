@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚄 高铁模拟驾驶 - 和谐号 & 复兴号</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 启动界面 -->
+    <div id="startScreen" class="screen">
+        <div class="title-container">
+            <h1>🚄 高铁模拟驾驶</h1>
+            <p class="subtitle">China High-Speed Rail Simulator</p>
+        </div>
+        
+        <div class="train-select">
+            <h2>选择列车</h2>
+            <div class="train-options">
+                <div class="train-card" data-train="hexie" onclick="selectTrain('hexie')">
+                    <div class="train-preview hexie-preview"></div>
+                    <h3>和谐号 CRH380A</h3>
+                    <p>最高时速: 380km/h</p>
+                    <p>经典车型，平稳舒适</p>
+                </div>
+                <div class="train-card" data-train="fuxing" onclick="selectTrain('fuxing')">
+                    <div class="train-preview fuxing-preview"></div>
+                    <h3>复兴号 CR400AF</h3>
+                    <p>最高时速: 400km/h</p>
+                    <p>中国标准，世界领先</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mode-select">
+            <h2>选择模式</h2>
+            <div class="mode-options">
+                <button class="mode-btn" onclick="startGame('free')">
+                    <span class="mode-icon">🛤️</span>
+                    <span class="mode-name">自由驾驶</span>
+                    <span class="mode-desc">无限探索，享受驾驶乐趣</span>
+                </button>
+                <button class="mode-btn" onclick="startGame('level1')">
+                    <span class="mode-icon">⏱️</span>
+                    <span class="mode-name">准点到达</span>
+                    <span class="mode-desc">按时到达目的地</span>
+                </button>
+                <button class="mode-btn" onclick="startGame('level2')">
+                    <span class="mode-icon">🌧️</span>
+                    <span class="mode-name">恶劣天气</span>
+                    <span class="mode-desc">雨雪天气安全驾驶</span>
+                </button>
+                <button class="mode-btn" onclick="startGame('level3')">
+                    <span class="mode-icon">🚨</span>
+                    <span class="mode-name">紧急任务</span>
+                    <span class="mode-desc">应对突发情况</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="controls-hint">
+            <p>🎮 操作提示: W/↑加速 | S/↓减速 | A/←D/→转向 | 空格紧急制动</p>
+        </div>
+    </div>
+
+    <!-- 游戏界面 -->
+    <div id="gameScreen" class="screen hidden">
+        <!-- 3D场景容器 -->
+        <div id="gameContainer"></div>
+        
+        <!-- HUD界面 -->
+        <div class="hud">
+            <!-- 速度表 -->
+            <div class="speedometer">
+                <div class="speed-value" id="speedValue">0</div>
+                <div class="speed-unit">km/h</div>
+                <div class="speed-dial">
+                    <div class="speed-needle" id="speedNeedle"></div>
+                </div>
+            </div>
+            
+            <!-- 信息面板 -->
+            <div class="info-panel">
+                <div class="info-item">
+                    <span class="label">列车</span>
+                    <span class="value" id="trainName">和谐号</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">距离</span>
+                    <span class="value"><span id="distance">0</span> km</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">时间</span>
+                    <span class="value" id="gameTime">00:00</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">下一站</span>
+                    <span class="value" id="nextStation">--</span>
+                </div>
+            </div>
+            
+            <!-- 推力指示器 -->
+            <div class="throttle-panel">
+                <div class="throttle-bar">
+                    <div class="throttle-fill" id="throttleFill"></div>
+                </div>
+                <div class="throttle-label">推力</div>
+            </div>
+            
+            <!-- 警告提示 -->
+            <div class="warning-panel hidden" id="warningPanel">
+                <div class="warning-icon">⚠️</div>
+                <div class="warning-text" id="warningText"></div>
+            </div>
+            
+            <!-- 迷你地图 -->
+            <div class="mini-map">
+                <canvas id="miniMapCanvas" width="200" height="150"></canvas>
+            </div>
+        </div>
+        
+        <!-- 驾驶控制 -->
+        <div class="controls-panel">
+            <div class="control-group">
+                <button class="control-btn brake" id="brakeBtn">制动</button>
+                <button class="control-btn emergency" id="emergencyBtn">⚠️ 紧急制动</button>
+            </div>
+            <div class="control-group">
+                <button class="control-btn horn" id="hornBtn">🔔 鸣笛</button>
+                <button class="control-btn light" id="lightBtn">💡 车灯</button>
+            </div>
+        </div>
+        
+        <!-- 暂停菜单 -->
+        <div class="pause-menu hidden" id="pauseMenu">
+            <h2>游戏暂停</h2>
+            <button onclick="resumeGame()">继续游戏</button>
+            <button onclick="restartGame()">重新开始</button>
+            <button onclick="exitGame()">返回主菜单</button>
+        </div>
+        
+        <!-- 关卡完成 -->
+        <div class="level-complete hidden" id="levelComplete">
+            <h2>🎉 到达目的地！</h2>
+            <div class="stats">
+                <p>用时: <span id="finalTime">--:--</span></p>
+                <p>平均速度: <span id="avgSpeed">0</span> km/h</p>
+                <p>准点率: <span id="punctuality">100</span>%</p>
+            </div>
+            <div class="stars" id="stars">⭐⭐⭐</div>
+            <div class="buttons">
+                <button onclick="restartGame()">再玩一次</button>
+                <button onclick="exitGame()">返回主菜单</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载界面 -->
+    <div id="loadingScreen" class="screen hidden">
+        <div class="loading-content">
+            <div class="loading-train">🚄</div>
+            <h2>加载中...</h2>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+            <p id="loadingText">正在初始化...</p>
+        </div>
+    </div>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- 游戏脚本 -->
+    <script src="js/utils.js"></script>
+    <script src="js/trains.js"></script>
+    <script src="js/track.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/physics.js"></script>
+    <script src="js/weather.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
