@@ -128,6 +128,7 @@
             <div class="control-group">
                 <button class="control-btn horn" id="hornBtn">🔔 鸣笛</button>
                 <button class="control-btn light" id="lightBtn">💡 车灯</button>
+                <button class="control-btn audio" id="audioBtn">🔊 音效</button>
             </div>
         </div>
         
@@ -135,8 +136,69 @@
         <div class="pause-menu hidden" id="pauseMenu">
             <h2>游戏暂停</h2>
             <button onclick="resumeGame()">继续游戏</button>
+            <button onclick="showSettings()">⚙️ 设置</button>
             <button onclick="restartGame()">重新开始</button>
             <button onclick="exitGame()">返回主菜单</button>
+        </div>
+
+        <!-- 设置面板 -->
+        <div class="settings-panel hidden" id="settingsPanel">
+            <h2>⚙️ 游戏设置</h2>
+
+            <div class="settings-section">
+                <h3>🔊 音频设置</h3>
+                <div class="setting-item">
+                    <label>主音量</label>
+                    <input type="range" id="masterVolume" min="0" max="100" value="70"
+                           onchange="updateSetting('masterVolume', this.value / 100)">
+                    <span id="masterVolumeValue">70%</span>
+                </div>
+                <div class="setting-item">
+                    <label>音效音量</label>
+                    <input type="range" id="sfxVolume" min="0" max="100" value="80"
+                           onchange="updateSetting('sfxVolume', this.value / 100)">
+                    <span id="sfxVolumeValue">80%</span>
+                </div>
+                <div class="setting-item">
+                    <label>环境音量</label>
+                    <input type="range" id="ambientVolume" min="0" max="100" value="60"
+                           onchange="updateSetting('ambientVolume', this.value / 100)">
+                    <span id="ambientVolumeValue">60%</span>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>🎨 图形设置</h3>
+                <div class="setting-item">
+                    <label>画质</label>
+                    <select id="graphics" onchange="updateSetting('graphics', this.value)">
+                        <option value="low">低</option>
+                        <option value="medium" selected>中</option>
+                        <option value="high">高</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label>显示FPS</label>
+                    <input type="checkbox" id="showFPS" onchange="updateSetting('showFPS', this.checked)">
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>🎮 游戏设置</h3>
+                <div class="setting-item">
+                    <label>难度</label>
+                    <select id="difficulty" onchange="updateSetting('difficulty', this.value)">
+                        <option value="easy">简单</option>
+                        <option value="normal" selected>普通</option>
+                        <option value="hard">困难</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="settings-buttons">
+                <button onclick="resetSettings()">恢复默认</button>
+                <button onclick="hideSettings()">关闭</button>
+            </div>
         </div>
         
         <!-- 关卡完成 -->
@@ -169,14 +231,19 @@
 
     <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
+
     <!-- 游戏脚本 -->
     <script src="js/utils.js"></script>
     <script src="js/trains.js"></script>
     <script src="js/track.js"></script>
+    <script src="js/spatial-grid.js"></script>
+    <script src="js/audio.js"></script>
     <script src="js/controls.js"></script>
     <script src="js/physics.js"></script>
     <script src="js/weather.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/fps-counter.js"></script>
+    <script src="js/ui-settings.js"></script>
     <script src="js/game.js"></script>
     <script src="js/main.js"></script>
 </body>

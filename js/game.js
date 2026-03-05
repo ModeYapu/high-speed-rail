@@ -5,24 +5,31 @@ class Game {
         this.camera = null;
         this.renderer = null;
         this.clock = null;
-        
+
         this.train = null;
         this.track = null;
         this.environment = null;
         this.physics = null;
         this.controls = null;
         this.weather = null;
-        
+        this.audio = null;
+
         this.selectedTrain = 'hexie';
         this.gameMode = 'free';
         this.isPaused = false;
         this.isRunning = false;
-        
+
         this.gameTime = 0;
         this.lastStation = null;
-        
+
         this.lightsOn = true;
         this.headlight = null;
+
+        // FPS计数器
+        this.fpsCounter = fpsCounter;
+
+        // 设置管理器
+        this.settings = settingsManager;
     }
     
     init() {
@@ -78,6 +85,9 @@ class Game {
             updateLoadingProgress(95, '准备天气系统...');
             this.createWeather();
             
+            updateLoadingProgress(97, '初始化音效...');
+            this.createAudio();
+            
             updateLoadingProgress(100, '完成！');
             
             setTimeout(() => {
@@ -125,15 +135,42 @@ class Game {
         this.weather = new Weather(this.scene);
     }
     
-    animate() {
+    createAudio() {
+        this.audio = new AudioManager();
+        console.log('🔊 音效系统已初始化');
+    }
+    
+    animate(currentTime = 0) {
         if (!this.isRunning) return;
         
-        requestAnimationFrame(() => this.animate());
+        requestAnimationFrame((time) => this.animate(time));
         
         if (this.isPaused) return;
         
-        const deltaTime = this.clock.getDelta();
+        // 帧率控制（目标60fps）
+        const targetFPS = 60;
+        const frameInterval = 1000 / targetFPS;
         
+        if (!this.lastFrameTime) {
+            this.lastFrameTime = currentTime;
+        }
+        
+        const elapsed = currentTime - this.lastFrameTime;
+        
+        // 跳过帧（如果渲染太快）
+        if (elapsed < frameInterval) {
+            return;
+        }
+        
+        this.lastFrameTime = currentTime - (elapsed % frameInterval);
+
+        const deltaTime = this.clock.getDelta();
+
+        // 更新FPS计数器
+        if (this.fpsCounter) {
+            this.fpsCounter.update(currentTime);
+        }
+
         // 更新游戏时间
         this.gameTime += deltaTime;
         
@@ -154,6 +191,9 @@ class Game {
         
         // 更新天气
         this.weather.update(deltaTime, this.train.position);
+        
+        // 更新音效
+        this.updateAudio();
         
         // 更新HUD
         this.updateHUD();
@@ -279,9 +319,15 @@ class Game {
     levelComplete() {
         this.isPaused = true;
         
+        // 停止所有音效并播放车站广播
+        if (this.audio) {
+            this.audio.stopAll();
+            this.audio.generateSound('station');
+        }
+        
         const stats = {
             time: Utils.formatTime(this.gameTime),
-            avgSpeed: Math.round((this.train.position / 1000) / (this.gameTime / 3600)),
+            avgSpeed: this.gameTime > 0 ? Math.round((this.train.position / 1000) / (this.gameTime / 3600)) : 0,
             punctuality: Math.max(0, 100 - Math.abs(this.gameTime - 1800) / 18)
         };
         
@@ -295,6 +341,49 @@ class Game {
         document.getElementById('stars').textContent = stars;
         
         document.getElementById('levelComplete').classList.remove('hidden');
+    }
+    
+    updateAudio() {
+        if (!this.audio || !this.train) return;
+        
+        const speed = this.train.getSpeedKmh();
+        const maxSpeed = this.train.config.maxSpeed;
+        
+        // 更新引擎声
+        if (speed > 5) {
+            // 速度大于5km/h时启动或更新引擎声
+            if (!this.audio.isEnginePlaying) {
+                this.audio.generateSound('engine', { speed, maxSpeed });
+            } else {
+                this.audio.updateEngineSound(speed, maxSpeed);
+            }
+        } else if (this.audio.isEnginePlaying) {
+            // 速度<=5时停止引擎声
+            this.audio.stopSound('engine');
+        }
+        
+        // 更新风声
+        if (speed > 50) {
+            if (!this.audio.ambientSounds.wind) {
+                this.audio.generateSound('wind', { speed });
+            } else {
+                this.audio.updateWindSound(speed);
+            }
+        } else {
+            this.audio.stopAmbientSound('wind');
+        }
+        
+        // 天气音效
+        if (this.weather && this.weather.currentWeather === 'rain') {
+            const intensity = this.weather.rainIntensity || 0.5;
+            if (!this.audio.ambientSounds.rain) {
+                this.audio.generateSound('rain', { intensity });
+            } else {
+                this.audio.updateRainSound(intensity);
+            }
+        } else {
+            this.audio.stopAmbientSound('rain');
+        }
     }
     
     showWarning(text) {
@@ -312,13 +401,24 @@ class Game {
         
         if (this.isPaused) {
             document.getElementById('pauseMenu').classList.remove('hidden');
+            // 暂停音效
+            if (this.audio) {
+                this.audio.pause();
+            }
         } else {
             document.getElementById('pauseMenu').classList.add('hidden');
+            // 恢复音效
+            if (this.audio) {
+                this.audio.resume();
+            }
         }
     }
     
     playHorn() {
-        // 播放鸣笛音效（简化版）
+        // 播放鸣笛音效
+        if (this.audio) {
+            this.audio.generateSound('horn');
+        }
         console.log('🔔 鸣笛！');
         
         // 闪烁提示
@@ -340,10 +440,59 @@ class Game {
         btn.style.opacity = this.lightsOn ? '1' : '0.5';
     }
     
+    toggleAudio() {
+        if (!this.audio) return;
+        
+        const isMuted = this.audio.toggleMute();
+        
+        const btn = document.getElementById('audioBtn');
+        if (btn) {
+            btn.textContent = isMuted ? '🔇 静音' : '🔊 音效';
+            btn.style.opacity = isMuted ? '0.5' : '1';
+        }
+        
+        console.log(isMuted ? '🔇 音效已静音' : '🔊 音效已开启');
+    }
+    
     onWindowResize() {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    cleanup() {
+        // 停止音频
+        if (this.audio) {
+            this.audio.stopAll();
+        }
+        
+        // 清理Three.js资源
+        if (this.scene) {
+            this.scene.traverse((object) => {
+                if (object.geometry) {
+                    object.geometry.dispose();
+                }
+                if (object.material) {
+                    if (Array.isArray(object.material)) {
+                        object.material.forEach(m => m.dispose());
+                    } else {
+                        object.material.dispose();
+                    }
+                }
+            });
+            
+            // 清空场景
+            while (this.scene.children.length > 0) {
+                this.scene.remove(this.scene.children[0]);
+            }
+        }
+        
+        // 清理控制器资源
+        if (this.controls) {
+            this.controls.cleanup();
+        }
+        
+        console.log('🧹 资源清理完成');
     }
 }
 
@@ -391,6 +540,9 @@ function resumeGame() {
 
 function restartGame() {
     if (game) {
+        // 清理资源
+        game.cleanup();
+        
         game.isPaused = false;
         document.getElementById('pauseMenu').classList.add('hidden');
         document.getElementById('levelComplete').classList.add('hidden');
